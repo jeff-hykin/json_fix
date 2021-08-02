@@ -1,17 +1,20 @@
 [tool.poetry]
 name = "your_package_name"
 version = "0.1.0"
-description = ""
+description = "YOUR_DESCRIPTION"
+authors=[]
+
+[tool.extra]
 author='YOUR_NAME_14057'
 author_email='YOUR_EMAIL'
 url='YOUR_GIT_REPO_URL'
 license = "MIT"
 
 [tool.poetry.dependencies]
-
-[tool.poetry.dev-dependencies]
 python = ">=3.7,<3.10"
 pip = "20.1.1"
+
+[tool.poetry.dev-dependencies]
 twine = "3.4.1"
 "keyrings.alt" = "4.0.2"
 toml = "^0.10.2"

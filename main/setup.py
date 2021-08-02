@@ -5,7 +5,7 @@ import toml
 # get the data out of the toml file
 # 
 toml_info = toml.load("../pyproject.toml")
-package_info = toml_info["tool"]["poetry"]
+package_info = {**toml_info["tool"]["poetry"], **toml_info["tool"]["extra"]}
 
 # 
 # get the data out of the readme file
