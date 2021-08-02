@@ -4,7 +4,7 @@ import toml
 # 
 # get the data out of the toml file
 # 
-toml_info = toml.load("./pyproject.toml")
+toml_info = toml.load("../pyproject.toml")
 package_info = toml_info["tool"]["poetry"]
 
 # 
