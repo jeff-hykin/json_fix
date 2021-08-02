@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+cd "$PROJECTR_FOLDER/main"
+rm -rf ./dist
+python setup.py sdist bdist_wheel
+if [ -d "./dist" ]
+then
+    twine upload dist/*
+fi

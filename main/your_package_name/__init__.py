@@ -1,0 +1,1 @@
+from your_package_name.main import *
