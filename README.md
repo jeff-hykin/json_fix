@@ -1,6 +1,6 @@
 # What is this?
 
-A patch to the buildit python `json` object that allows classes to specify how they should be serialized.
+A patch to the built-in python `json` object that allows classes to specify how they should be serialized.
 
 # Why?
 
@@ -27,7 +27,7 @@ class YOUR_CLASS:
         return "a built-in object that is natually json-able"
 ```
 
-If you want control over classes you didn't define yourself, use the converter table
+If you want control over that are defined externally (datetime, numpy.array, tensor, etc), use the override_table
 ```python
 from json_fix import fix_it; fix_it() # only needs to be done once per runtime, NOT per-file
 import json
