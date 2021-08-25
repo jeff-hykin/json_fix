@@ -27,7 +27,7 @@ class YOUR_CLASS:
         return "a built-in object that is natually json-able"
 ```
 
-If you want control over that are defined externally (datetime, numpy.array, tensor, etc), use the override_table
+If you want control over classes that are defined externally (datetime, numpy.array, tensor, etc), use the override_table
 ```python
 from json_fix import fix_it; fix_it() # only needs to be done once per runtime, NOT per-file
 import json
