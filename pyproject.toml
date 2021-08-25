@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "your_package_name"
+name = "json_fix"
 version = "0.1.0"
-description = "YOUR_DESCRIPTION"
+description = "allow custom class json behavior on builtin json object"
 authors=[]
 
 [tool.extra]
-author='YOUR_NAME_14057'
-author_email='YOUR_EMAIL'
-url='YOUR_GIT_REPO_URL'
+author='Jeff Hykin'
+author_email='jeff.hykin@gmail.com'
+url='https://github.com/jeff-hykin/json_fix.git'
 license = "MIT"
 
 [tool.poetry.dependencies]

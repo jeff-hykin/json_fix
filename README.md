@@ -1,32 +1,34 @@
 # What is this?
 
-A template for python packages
+A patch to the buildit python `json` object that allows classes to specify how they should be serialized.
 
-# How do I fill out this template?
+# Why?
 
-1. Change the `pyproject.toml` file (package name, version, etc)
-2. Change the `./main/your_package_name` folder
-3. Edit the `./main/your_package_name/__init__.py` file, and change the `from your_package_name.main import *`
-4. Open the `./main/setup.py` and edit the `install_requires=` part to include dependencies
-5. Edit this readme (it will be the front page of the package)
-6. Edit the `./main/your_package_name/main.py` to have your library in it
-7. Run `project local_install` to install what you just made
-8. Run `project publish` to release your package
-
-
-## (Readme template below)
-
-# What is this?
-
-(Your answer here)
+Because sometimes external code uses something like
+```
+import json
+json.dumps(list_containing_your_object)
+```
+And it simply throws an error no matter how you customize your object
 
 # How do I use this?
 
-`pip install your_package_name`
-
+`pip install json-fix`
 
 ```python
-from your_package_name import something
+from json_fix import fix_it
+fix_it() # only needs to be done once per runtime, NOT per-file
 
-# example of how to use your package here
+# same file, or different file
+class YOUR_CLASS:
+    def __json_dumps__(self, **options):
+        # `options` will be same as the options given to json.dump()
+        #     which currently are: (skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, cls=None, indent=None, separators=None, default=None, sort_keys=False, **kw))
+        
+        # YOUR CUSTOM CODE HERE
+        #    you probably just want to do:
+        #        return json.dumps(self.__dict__, **options)
+        
+        return "some kinda string"
+
 ```
