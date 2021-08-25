@@ -35,9 +35,9 @@ import pandas as pd
 
 SomeClassYouDidntDefine = pd.DataFrame
 
-# the key is a lambda checker, the value is the converter if the check==True
+# create a boolean function for identifying the class
 class_checker = lambda obj: isinstance(obj, SomeClassYouDidntDefine)
-# the lambda here (the converter) needs to return a string
+# then assign it to a function that does the converting
 json.override_table[class_checker] = lambda obj_of_that_class: json.loads(obj_of_that_class.to_json())
 
 json.dumps([ 1, 2, SomeClassYouDidntDefine() ], indent=2)
