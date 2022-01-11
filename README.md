@@ -16,7 +16,7 @@ And it simply throws an error no matter how you customize your object
 `pip install json-fix`
 
 ```python
-from json_fix import fix_it; fix_it() # only needs to be done once per runtime, NOT per-file
+import json_fix # import this before the JSON.dumps gets called
 
 # same file, or different file
 class YOUR_CLASS:
@@ -29,7 +29,7 @@ class YOUR_CLASS:
 
 If you want control over classes that are defined externally (datetime, numpy.array, tensor, etc), use the override_table
 ```python
-from json_fix import fix_it; fix_it() # only needs to be done once per runtime, NOT per-file
+import json_fix # import this before the JSON.dumps gets called
 import json
 import pandas as pd
 
