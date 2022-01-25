@@ -2,6 +2,7 @@
 # Custom
 # 
 dist/
+build/
 
 # 
 # standard
