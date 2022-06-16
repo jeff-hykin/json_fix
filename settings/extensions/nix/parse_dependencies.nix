@@ -10,7 +10,7 @@
     # 
     frozenStd = (builtins.import 
         (builtins.fetchTarball
-            ({url="https://github.com/NixOS/nixpkgs/archive/8917ffe7232e1e9db23ec9405248fd1944d0b36f.tar.gz";})
+            ({url="https://github.com/NixOS/nixpkgs/archive/a7ecde854aee5c4c7cd6177f54a99d2c1ff28a31.tar.gz";})
         )
         ({})
     );
@@ -24,14 +24,15 @@
         )
         (builtins) # <- for import, fetchTarball, etc 
     );
+    pathToThisFile = (builtins.getEnv
+        "__FORNIX_NIX_MAIN_CODE_PATH"
+    );
     # 
     # pull info from the config files
     # 
     nixSettings = (main.fromTOML
         (main.readFile 
-            (main.getEnv
-                "__PROJECTR_NIX_SETTINGS_PATH"
-            )
+            ./settings.toml
         )
     );
     # 
@@ -39,19 +40,17 @@
     # 
     packageToml = (main.fromTOML
         (main.readFile
-            (main.getEnv 
-                ("__PROJECTR_NIX_PACKAGES_FILE_PATH")
-            )
+            ./nix.toml
         )
     );
     # 
     # load the store with all the packages, and load it with the config
     # 
-    mainRepo = (main.fetchTarball
-        ({url="https://github.com/NixOS/nixpkgs/archive/${nixSettings.mainRepo}.tar.gz";})
+    defaultFrom = (main.fetchTarball
+        ({url="https://github.com/NixOS/nixpkgs/archive/${nixSettings.defaultFrom}.tar.gz";})
     );
     mainPackages = (main.import
-        (mainRepo)
+        (defaultFrom)
         ({ config = nixSettings.config;})
     );
     packagesForThisMachine = (main.filter
@@ -229,24 +228,74 @@
     return = (main.mergeAttrs
         (main)
         ({
-            nixPath = "${mainRepo}";
+            nixPath = "${defaultFrom}";
             packages = packages;
+            importMixin = (
+                fileName : (builtins.import
+                    (builtins.toPath
+                        "${pathToThisFile}/../mixins/${fileName}"
+                    )
+                    ({
+                        main = return;
+                    })
+                )
+            );
+            mergeMixins = (
+                mixins : (
+                    # this combines them into one big map ({}), which is done for any env vars they set
+                    (main.foldl'
+                        (curr: next: curr // next)
+                        {}
+                        mixins
+                    )
+                    
+                    //
+                    
+                    # here's how all the normal attributes are merged
+                    {
+                        buildInputs = (main.concatLists
+                            (main.map
+                                (
+                                    each: (  { buildInputs=[]; }   //   each  ).buildInputs
+                                )
+                                mixins
+                            )
+                        );
+                        nativeBuildInputs = (main.concatLists
+                            (main.map
+                                (
+                                    each: (  { nativeBuildInputs=[]; }   //   each  ).nativeBuildInputs
+                                )
+                                mixins
+                            )
+                        );
+                        shellHook = (main.concatStringsSep "\n"
+                            (main.map
+                                (
+                                    each: (  { shellHook=""; }   //   each  ).shellHook
+                                )
+                                mixins
+                            )
+                        );
+                    }
+                )
+            );
             project = {
                 buildInputs = buildInputs;
                 nativeBuildInputs = nativeBuildInputs;
-                protectHomeShellCode = ''
+                shellHook = ''
                     # 
-                    # find the projectr_core
+                    # find the fornix_core
                     # 
-                    path_to_projectr_core=""
-                    file_name="settings/projectr_core"
+                    path_to_fornix_core=""
+                    file_name="settings/fornix_core"
                     folder_to_look_in="$PWD"
                     while :
                     do
                         # check if file exists
                         if [ -f "$folder_to_look_in/$file_name" ]
                         then
-                            path_to_projectr_core="$folder_to_look_in/$file_name"
+                            path_to_fornix_core="$folder_to_look_in/$file_name"
                             break
                         else
                             if [ "$folder_to_look_in" = "/" ]
@@ -257,35 +306,43 @@
                             fi
                         fi
                     done
-                    if [ -z "$path_to_projectr_core" ]
+                    if [ -z "$path_to_fornix_core" ]
                     then
                         #
                         # what to do if file never found
                         #
                         echo "Im part of parse_dependencies.nix, a script running with a pwd of:$PWD"
-                        echo "Im looking for settings/projectr_core in a parent folder"
+                        echo "Im looking for settings/fornix_core in a parent folder"
                         echo "Im exiting now because I wasnt able to find it"
                         echo "thats all the information I have"
                         exit
                     fi
-                    source "$path_to_projectr_core"
+                    export FORNIX_NEXT_RUN_DONT_DO_MANUAL_START="true"
+                    . "$path_to_fornix_core"
+                    
+                    if [ "$FORNIX_DEBUG" = "true" ]; then
+                        echo "starting: 'shellHook' inside the 'settings/extensions/nix/parse_dependencies.nix' file"
+                    fi
                     
                     # ensure that the folder exists
-                    mkdir -p "$(dirname "$__PROJECTR_NIX_PATH_EXPORT_FILE")"
-                    echo ${main.escapeShellArg (packagePathsAsJson)} > "$__PROJECTR_NIX_PATH_EXPORT_FILE"
+                    mkdir -p "$(dirname "$__FORNIX_NIX_PATH_EXPORT_FILE")"
+                    echo ${main.escapeShellArg (packagePathsAsJson)} > "$__FORNIX_NIX_PATH_EXPORT_FILE"
                     
-                    if [ -n "$PROJECTR_HOME" ]
+                    if [ -n "$FORNIX_HOME" ]
                     then
                         # we don't want to give nix or other apps our home folder
-                        if [[ "$HOME" != "$PROJECTR_HOME" ]] 
+                        if ! [ "$HOME" = "$FORNIX_HOME" ]
                         then
-                            mkdir -p "$PROJECTR_HOME/.cache/"
-                            ln -s "$HOME/.cache/nix" "$PROJECTR_HOME/.cache/" &>/dev/null
+                            if [ "$FORNIX_DEBUG" = "true" ]; then
+                                echo "replacing: HOME with FORNIX_HOME"
+                            fi
+                            mkdir -p "$FORNIX_HOME/.cache/"
+                            ln -s "$HOME/.cache/nix/" "$FORNIX_HOME/.cache/" &>/dev/null
                             
                             # so make the home folder the same as the project folder
-                            export HOME="$PROJECTR_HOME"
+                            export HOME="$FORNIX_HOME"
                             # make it explicit which nixpkgs we're using
-                            export NIX_PATH="nixpkgs=${mainRepo}:."
+                            export NIX_PATH="nixpkgs=${defaultFrom}:."
                         fi
                     fi
                 '';

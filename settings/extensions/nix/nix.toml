@@ -37,6 +37,8 @@
     # and know that seeing `pkgs` online translates to `main.packages` inside the shell.nix file
 
 
+# [[ you can add tools for your project right here or at the bottom ]]
+
 # 
 # Python
 # 
@@ -66,6 +68,22 @@ load = [ "poetry",]
 from = "3f50332bc4913a56ad216ca01f5d0bd24277a6b2"
 
 # 
+# for .so errors on linux with opencv+ffmpeg
+# 
+
+[[packages]]
+onlyIf = [ [ "stdenv", "isLinux",],]
+load = [ "glib",]
+asNativeBuildInput = true
+from = "528d35bec0cb976a06cc0e8487c6e5136400b16b"
+
+[[packages]]
+onlyIf = [ [ "stdenv", "isLinux",],]
+load = [ "libglvnd",]
+asNativeBuildInput = true
+from = "559cf76fa3642106d9f23c9e845baf4d354be682"
+
+# 
 # 
 # 
 # Need-to-build-from-source tools
@@ -73,11 +91,8 @@ from = "3f50332bc4913a56ad216ca01f5d0bd24277a6b2"
 # 
 # 
 # Note: most projects need these, 
-# and if you need them for one project nix has a shared-memory
-# so needing them for one project is the same as needing them for 
-# all your projects
-# comment these out in a situation such as deploying a project 
-# to a minimal server that doesn't need C/C++ build tools
+# and if you need them for one project nix has a shared-memory across projects
+# comment these out in a situation such as deploying a project to a minimal server
 
 # 
 # Linux
@@ -140,12 +155,27 @@ asNativeBuildInput = true
 onlyIf = [ [ "stdenv", "isDarwin",],]
 
 [[packages]]
+load = [ "darwin", "apple_sdk", "frameworks", "AVFoundation" ]
+asNativeBuildInput = true
+onlyIf = [ [ "stdenv", "isDarwin",],]
+
+[[packages]]
 load = [ "darwin", "apple_sdk", "frameworks", "AppKit" ]
 asNativeBuildInput = true
 onlyIf = [ [ "stdenv", "isDarwin",],]
 
 [[packages]]
+load = [ "darwin", "apple_sdk", "frameworks", "WebKit" ]
+asNativeBuildInput = true
+onlyIf = [ [ "stdenv", "isDarwin",],]
+
+[[packages]]
 load = [ "darwin", "apple_sdk", "frameworks", "Accounts" ]
+asNativeBuildInput = true
+onlyIf = [ [ "stdenv", "isDarwin",],]
+
+[[packages]]
+load = [ "darwin", "apple_sdk", "frameworks", "Security" ]
 asNativeBuildInput = true
 onlyIf = [ [ "stdenv", "isDarwin",],]
 
@@ -165,7 +195,7 @@ load = [ "libkrb5",]
 # 
 
 [[packages]]
-load = [ "ncurses",]
+load = [ "ncurses5",]
 
 [[packages]]
 load = [ "openssh",]
@@ -176,6 +206,9 @@ load = [ "openssh",]
 # 
 # 
 [[packages]]
+load = [ "fd",]
+
+[[packages]]
 load = [ "sd",]
 
 [[packages]]
@@ -185,8 +218,7 @@ load = [ "dua",]
 load = [ "tealdeer",]
 
 [[packages]]
-load = [ "ytop",]
-from = "a332da8588aeea4feb9359d23f58d95520899e3c"
+load = [ "bottom",]
 
 [[packages]]
 load = [ "exa",]
@@ -211,6 +243,9 @@ load = [ "nnn",]
 
 [[packages]]
 load = [ "jq",]
+
+[[packages]]
+load = [ "git-subrepo",]
 
 #
 #
@@ -253,6 +288,12 @@ load = [ "zip",]
 
 [[packages]]
 load = [ "findutils",]
+
+[[packages]]
+load = [ "wget",]
+
+[[packages]]
+load = [ "curl",]
 
 [[packages]]
 load = [ "unixtools", "arp",]
@@ -334,6 +375,13 @@ load = [ "unixtools", "write",]
 
 [[packages]]
 load = [ "unixtools", "xxd",]
+
+# 
+# core
+# 
+[[packages]]
+load = [ "deno",]
+from = "c82b46413401efa740a0b994f52e9903a4f6dcd5"
 
 [[packages]]
 load = [ "nix",]
