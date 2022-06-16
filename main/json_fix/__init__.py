@@ -1,16 +1,19 @@
+import json
+from json import JSONEncoder
+
 # 
 # one-time
 #    monkey-patch the json dumper
 #    this makes external calls to `import json` never know the difference
 #    the object will just auto-serialize
 # 
-import json
-from json import JSONEncoder
 
 # check to make sure this only runs once
 if not hasattr(JSONEncoder, "original_default"):
-    json.override_table = {} # this allows for adding serializers to classes you didnt define yourself
-    json.fallback_table = {} # this allows for adding generic methods like using str(obj) or obj.__dict__
+    from collections import OrderedDict
+    
+    json.override_table = OrderedDict() # this allows for adding serializers to classes you didnt define yourself
+    json.fallback_table = OrderedDict() # this allows for adding generic methods like using str(obj) or obj.__dict__
     # 
     # add patch for __json__
     # 
