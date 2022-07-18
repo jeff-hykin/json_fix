@@ -33,7 +33,9 @@ if not hasattr(JSONEncoder, "original_default"):
         # then check the __json__ method
         # 
         if hasattr(obj.__class__, "__json__"):
-            getattr(obj.__class__, "__json__", wrapped_default.default)(obj)
+            json_method = getattr(obj.__class__, "__json__")
+            if callable(json_method):
+                return json_method(obj)
         
         # 
         # then check the fallback_table
@@ -45,7 +47,8 @@ if not hasattr(JSONEncoder, "original_default"):
                 custom_converter_function = json.fallback_table[each_checker]
                 output = custom_converter_function(obj)
                 return output
-        return getattr(obj.__class__, "__json__", wrapped_default.default)(obj)
+        
+        return wrapped_default.default(obj)
 
     wrapped_default.default = JSONEncoder().default
     # apply the patch
