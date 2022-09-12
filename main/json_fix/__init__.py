@@ -17,7 +17,7 @@ if not hasattr(JSONEncoder, "original_default"):
     # 
     # add patch for __json__
     # 
-    def wrapped_default(self, obj):
+    def wrapped_encoder(self, obj, *args, **kwargs):
         # 
         # first check the override_table
         # 
@@ -48,11 +48,13 @@ if not hasattr(JSONEncoder, "original_default"):
                 output = custom_converter_function(obj)
                 return output
         
-        return wrapped_default.default(obj)
+        return JSONEncoder.original_encode(self, obj, *args, **kwargs)
 
-    wrapped_default.default = JSONEncoder().default
+    wrapped_encoder.default = JSONEncoder().default
     # apply the patch
     JSONEncoder.original_default = JSONEncoder.default
-    JSONEncoder.default = wrapped_default
+    JSONEncoder.original_encode = JSONEncoder.encode
+    JSONEncoder.default = wrapped_encoder
+    JSONEncoder.encode = wrapped_encoder
 
 def fix_it(): pass # to support the old interface 
