@@ -85,6 +85,6 @@ if not hasattr(JSONEncoder, "original_default"):
     
     # apply the patch
     JSONEncoder.default = PatchedJsonEncoder.default
-    JSONEncoder.encode = PatchedJsonEncoder.encode
+    JSONEncoder.encode = PatchedJsonEncoder.encode # needs to be overridden because of https://stackoverflow.com/questions/16405969/how-to-change-json-encoding-behaviour-for-serializable-python-object/16406798#16406798
 
 def fix_it(): pass # to support the old interface 
