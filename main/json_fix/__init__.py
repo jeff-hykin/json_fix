@@ -14,10 +14,8 @@ if not hasattr(JSONEncoder, "original_default"):
     
     json.override_table = OrderedDict() # this allows for adding serializers to classes you didnt define yourself
     json.fallback_table = OrderedDict() # this allows for adding generic methods like using str(obj) or obj.__dict__
-    # 
-    # add patch for __json__
-    # 
-    def wrapped_default(self, obj):
+    
+    def object_to_jsonable(obj):
         # 
         # first check the override_table
         # 
@@ -48,11 +46,24 @@ if not hasattr(JSONEncoder, "original_default"):
                 output = custom_converter_function(obj)
                 return output
         
-        return wrapped_default.default(obj)
+        return obj
+    
+    JSONEncoder.original_default = original_default = JSONEncoder.default
+    JSONEncoder.original_encode  = original_encode  = JSONEncoder.encode
+    
+    class PatchedJsonEncoder(json.JSONEncoder):
+        # transform objects known to JSONEncoder here
+        def encode(self, obj, *args, **kwargs):
+            obj = object_to_jsonable(obj)
+            return original_encode(self, obj, *args, **kwargs)
 
-    wrapped_default.default = JSONEncoder().default
+        # handle objects not known to JSONEncoder here
+        def default(self, obj, *args, **kwargs):
+            obj = object_to_jsonable(obj)
+            return original_default(self, obj, *args, **kwargs)
+    
     # apply the patch
-    JSONEncoder.original_default = JSONEncoder.default
-    JSONEncoder.default = wrapped_default
+    JSONEncoder.default = PatchedJsonEncoder.default
+    JSONEncoder.encode = PatchedJsonEncoder.encode
 
 def fix_it(): pass # to support the old interface 
