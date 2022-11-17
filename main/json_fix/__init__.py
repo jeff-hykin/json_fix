@@ -81,6 +81,8 @@ if not hasattr(JSONEncoder, "original_default"):
         # handle objects not known to JSONEncoder here
         def default(self, obj, *args, **kwargs):
             obj = object_to_jsonable(obj)
+            if type(obj) in builtin_jsonable:
+                return original_encode(self, obj, *args, **kwargs)
             return original_default(self, obj, *args, **kwargs)
     
     # apply the patch
