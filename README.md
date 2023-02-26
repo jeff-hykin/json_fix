@@ -8,7 +8,7 @@ From a technical perspective, this module is a safe, backwards-compatible, rever
 # Why?
 
 Because sometimes external code uses something like
-```
+```python
 import json
 json.dumps(list_containing_your_object)
 ```
