@@ -1,6 +1,8 @@
 # What is this?
 
-A patch to the built-in python `json` object that allows classes to specify how they should be serialized.
+A pip module that let you define a `__json__` method, and has that method magically work with the built-in json module.
+
+From a technical perspective, its a patch to the built-in python `json` object that allows classes to specify how they should be serialized.
 
 # Why?
 
