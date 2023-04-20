@@ -1,0 +1,7 @@
+{
+    "pure_python_packages": {
+        "file_system_py": {
+            "path": "__sources__/file_system_py/main/file_system_py"
+        },
+    }
+}
