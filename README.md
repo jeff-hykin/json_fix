@@ -32,7 +32,7 @@ class YOUR_CLASS:
 
 # How do I change how someone elses class is jsonified?
 
-There's 2 ways; the aggressive `override_table` or the more collaboration-friendly `fallback_table`.
+There's 2 ways; the aggressive `override_table` or the more collaboration-friendly `fallback_table`. Some really powerful stuff can be done safely with the fallback table.
 
 ## Override Table
 
@@ -57,6 +57,22 @@ json.dumps([ 1, 2, SomeClassYouDidntDefine() ], indent=2) # dumps as expected
 
 ## Fallback Table
 
-One of the best uses of the fallback table is safely adding wide-sweeping defaults. For example, making all custom classes default to `.__dict__` even if they don't have a .__json__() method, or checking for a `.__repr__()` method and using that.
+Let's say we want all python classes to be jsonable by default, well we can easily do that with the fallback table. The logic is `if notthing in override table, and no .__json__ method, then check the fallback table`. 
 
-You can add to the `json.fallback_table` just like the `override_table`. The only difference is; if there's nothing in the override table, and the class doesn't have a `.__json__()` method, then the fallback_table will be used.
+```python
+import json_fix # import this before the JSON.dumps gets called
+import json
+
+# a checker for custom objects
+checker = lambda obj: hasattr(obj, "__dict__")
+# use the __dict__ when they don't specify a __json__ method 
+json.fallback_table[checker] = lambda obj_with_dict: obj_with_dict.__dict__
+
+class SomeClass:
+    def __init__(self):
+        self.thing = 10
+
+json.dumps([ 1, 2, SomeClass() ], indent=2) # dumps as expected
+```
+
+Like the override table, the most recently-added checker will have the highest priority. 
