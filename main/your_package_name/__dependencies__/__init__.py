@@ -7,6 +7,7 @@ import sys
 import warnings # TODO: convert serveral prints to warnings
 from hashlib import md5 
 
+is_windows = os.name == 'nt'
 # 
 # helpers
 # 
@@ -153,15 +154,22 @@ for dependency_name, dependency_info in dependency_mapping.items():
     relative_target_path = make_relative_path(to=target_path, coming_from=best_import_zone_match)
     # ensure the parent folder
     *path_parts, _, _ = path_pieces(join(relative_target_path, "_"))
-    eval_part = dependency_info.get("eval", dependency_name)
     unique_name = f"{dependency_name}_{random()}_{counter}".replace(".","")
     target_folder_for_import = join(this_folder, dependency_name)
-    if not Path(target_folder_for_import).is_symlink() or final_target_of(target_folder_for_import) != dependency_info["path"]:
-        # clear the way
+    
+    target_path_obj = Path(target_folder_for_import)
+    if is_windows:
+        if not target_path_obj.exists():
+            # windows has to copy the files because it can't symlink
+            if os.path.isdir(target_path):
+                shutil.copytree(target_path, target_folder_for_import)
+            else:
+                shutil.copy(target_path, target_folder_for_import)
+    elif not target_path_obj.is_symlink() or final_target_of(target_folder_for_import) != dependency_info["path"]:
+        # clear the way (encase something was in the way)
         remove(target_folder_for_import)
-        # symlink the folder
-        Path(target_folder_for_import).symlink_to(dependency_info["path"])
-
+        target_path_obj.symlink_to(dependency_info["path"])
+        
 # import the paths
 __all__ = []
 for dependency_name, dependency_info in dependency_mapping.items():
@@ -170,7 +178,7 @@ for dependency_name, dependency_info in dependency_mapping.items():
         exec(f"""from .{dependency_name} import __file__ as _""")
         __all__.append(dependency_name)
     except ImportError as error:
-        if f"{error}" == "ImportError: cannot import name '__file__'":
+        if f"{error}" == "cannot import name '__file__'":
             # this means top level folder isn't a module or doesnt have a __init__.py
             # some modules simply are like this
             pass
