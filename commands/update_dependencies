@@ -4,7 +4,7 @@ echo "1.33.1"; : --% ' |out-null <#'; }; version="$(dv)"; deno="$HOME/.deno/$ver
 # */0}`;
 // import { FileSystem, glob } from "https://deno.land/x/quickr@0.6.44/main/file_system.js"
 import { FileSystem, glob } from "/Users/jeffhykin/repos/quickr/main/file_system.js"
-import { run, Stderr, Stdout } from "https://deno.land/x/quickr@0.6.44/main/run.js"
+import { returnAsString, run, Stderr, Stdout, Out } from "https://deno.land/x/quickr@0.6.44/main/run.js"
 import { recursivelyAllKeysOf, get, set, remove, merge, compareProperty } from "https://deno.land/x/good@1.4.4.0/object.js"
 import ProgressBar from "https://deno.land/x/progress@v1.3.8/mod.ts"
 import { makeIterable, asyncIteratorToList, concurrentlyTransform } from "https://deno.land/x/good@1.1.1.2/iterable.js"
@@ -30,26 +30,45 @@ if (pathInfo.isFolder) {
 
 const settingsJsonPath = `${FileSystem.parentPath(depsFolder)}/settings.json`
 const dependencies = JSON.parse(await FileSystem.read(settingsJsonPath))?.pure_python_packages ?? {}
-const globPath = `${depsFolder}/__sources__/*/.gitrepo`
-for (const eachPath of await glob(globPath, { searchOrder: 'breadthFirstSearch'})) {
-    const folderToPull = FileSystem.parentPath(eachPath)
-    console.log(`pulling: ${eachPath}`)
-    const { success } = (await run`git subrepo pull --force ${folderToPull}`) 
-    if (!success) {
-        break
+
+const statusOutput = await run`git status ${Out(returnAsString)}`
+let changesWereStashed = false
+if (statusOutput.match(/Changes to be committed:|Changes not staged for commit:|Untracked files:/)) {
+    await run`git add ${settingsJsonPath} ${Out(null)}`
+    await run`git commit -m ${"add settings path"} ${Out(null)}`
+    await run`git add -A`
+    if (await run`git stash`.success) {
+        changesWereStashed = true
     }
 }
-for (const [importName, value] of Object.entries(dependencies)) {
-    const { path, git_url: gitUrl } = value
-    const repoPath = `${depsFolder}/__sources__/${importName}`
-    if (gitUrl) {
-        if (!(await FileSystem.info(repoPath)).exists) {
-            console.log(`cloning: ${gitUrl}`)
-            const {success} = await run`git subrepo clone ${gitUrl} ${repoPath}`
-            if (!success) {
-                break
+try {
+    
+    const globPath = `${depsFolder}/__sources__/*/.gitrepo`
+    for (const eachPath of await glob(globPath, { searchOrder: 'breadthFirstSearch'})) {
+        const folderToPull = FileSystem.parentPath(eachPath)
+        console.log(`pulling: ${eachPath}`)
+        const { success } = (await run`git subrepo pull --force ${folderToPull}`) 
+        if (!success) {
+            break
+        }
+    }
+    for (const [importName, value] of Object.entries(dependencies)) {
+        const { path, git_url: gitUrl } = value
+        const repoPath = `${depsFolder}/__sources__/${importName}`
+        if (gitUrl) {
+            if (!(await FileSystem.info(repoPath)).exists) {
+                console.log(`cloning: ${gitUrl}`)
+                const {success} = await run`git subrepo clone ${gitUrl} ${repoPath}`
+                if (!success) {
+                    break
+                }
             }
         }
+    }
+} finally {
+    if (changesWereStashed) {
+        await run`git stash pop`
+        await run`git add -A`
     }
 }
 
