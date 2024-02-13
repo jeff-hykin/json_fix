@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "json_fix"
-version = "0.5.2"
+version = "1.0.0"
 description = "allow custom class json behavior on builtin json object"
 authors=[]
 
