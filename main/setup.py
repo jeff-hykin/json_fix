@@ -25,6 +25,9 @@ setuptools.setup(
     author_email=package_info["author_email"],
     license=package_info["license"],
     packages=[package_info["name"]],
+    # package_data={
+    #     package_info["name"]: ['__dependencies__/**/*'],
+    # },
     install_requires=[
         # examples:
         # 'aiohttp >= 3.7.4',
