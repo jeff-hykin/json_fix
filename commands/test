@@ -1,0 +1,14 @@
+#!/usr/bin/env -S deno run --allow-all
+import { FileSystem, glob } from "https://deno.land/x/quickr@0.6.63/main/file_system.js"
+import { run, Stderr, Stdout } from "https://deno.land/x/quickr@0.6.63/main/run.js"
+
+// go to project root
+FileSystem.cwd = `${FileSystem.thisFolder}/..`
+
+await FileSystem.remove(await glob(`./tests/*.json`))
+
+let exitCode = 0
+const pythonFiles = await FileSystem.listFileItemsIn("./tests", { shouldntInclude:(each)=>!each.endsWith(".py")})
+for (const each of pythonFiles) {
+    await run`python3 ${each.path}`
+}

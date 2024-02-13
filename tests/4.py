@@ -5,11 +5,14 @@ class Test(dict):
     def __json__(self):
         return 99
 
-with open("tests/test4.json", "w") as f:
+with open("tests/test4_1.json", "w") as f:
     json.dump([Test()], f)
 
-# print(f'''test4, pt3, should print and throw error''')
-# print(json.dumps(Test()))
+with open("tests/test4_2.json", "w") as f:
+    json.dump(Test(), f)
 
-# print(f'''test4, pt4, should print and throw error''')
-# print(json.dumps([Test()]))
+with open("tests/test4_3.json", 'w') as the_file:
+    the_file.write(str(json.dumps([Test()])))
+
+with open("tests/test4_4.json", 'w') as the_file:
+    the_file.write(str(json.dumps(Test())))

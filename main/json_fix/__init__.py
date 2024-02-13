@@ -11,7 +11,7 @@ from json import JSONEncoder
 # check to make sure this only runs once
 if not hasattr(JSONEncoder, "original_default"):
     from collections import OrderedDict
-    builtin_jsonable  = frozenset((dict, list, tuple, set, frozenset, str, int, float, bool, type(None)))
+    builtin_jsonable  = (dict, list, tuple, set, frozenset, str, int, float, bool, type(None))
     builtin_list_like = (list, tuple, set, frozenset)
     
     json.override_table = OrderedDict() # this allows for adding serializers to classes you didnt define yourself
@@ -88,5 +88,8 @@ if not hasattr(JSONEncoder, "original_default"):
     # apply the patch
     JSONEncoder.default = PatchedJsonEncoder.default
     JSONEncoder.encode = PatchedJsonEncoder.encode # needs to be overridden because of https://stackoverflow.com/questions/16405969/how-to-change-json-encoding-behaviour-for-serializable-python-object/16406798#16406798
+    
+    original_dump = json.dump
+    json.dump = lambda obj, *args, **kwargs: original_dump((object_to_jsonable(obj) if isinstance(obj, builtin_jsonable) else obj), *args, cls=PatchedJsonEncoder, **kwargs)
 
 def fix_it(): pass # to support the old interface 
