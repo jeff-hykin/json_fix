@@ -1,5 +1,6 @@
 import setuptools
 import toml
+from file_system_py import iterate_paths_in
 
 # 
 # get the data out of the toml file
@@ -26,7 +27,11 @@ setuptools.setup(
     license=package_info["license"],
     packages=[package_info["name"]],
     # package_data={
-    #     package_info["name"]: ['__dependencies__/**/*'],
+    #     # include all files/folders in the module (recursively)
+    #     package_info["name"]: [
+    #         each[len(package_info["name"])+1:]
+    #             for each in iterate_paths_in(package_info["name"], recursively=True)
+    #     ],
     # },
     install_requires=[
         # examples:

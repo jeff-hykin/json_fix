@@ -9,6 +9,10 @@ author='Jeff Hykin'
 author_email='jeff.hykin@gmail.com'
 url='https://github.com/jeff-hykin/json_fix.git'
 license = "MIT"
+main_module_path = "main/YOUR_PACKAGE_NAME"
+
+[[tool.extra.pure_python_packages]]
+path = "main/YOUR_PACKAGE_NAME"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.12"
@@ -17,6 +21,7 @@ python = ">=3.7,<3.12"
 twine = "3.4.1"
 "keyrings.alt" = "4.0.2"
 toml = "^0.10.2"
+file-system-py = "0.0.11"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

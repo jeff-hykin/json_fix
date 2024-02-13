@@ -4,6 +4,7 @@ rm -rf ./dist
 python setup.py sdist bdist_wheel
 if [ -d "./dist" ]
 then
+    stty sane 2>/dev/null
     twine upload dist/*
 fi
 
@@ -14,7 +15,7 @@ import toml
 # 
 # get the data out of the toml file
 # 
-toml_info = toml.load("./pyproject.toml")
+toml_info = toml.load("../pyproject.toml")
 package_info = {**toml_info["tool"]["poetry"], **toml_info["tool"]["extra"]}
 print(package_info["version"])
 ')"
