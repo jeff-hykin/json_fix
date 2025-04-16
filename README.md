@@ -7,19 +7,19 @@ From a technical perspective, this module is a safe, backwards-compatible, rever
 
 # Why?
 
-Because sometimes external code uses something like
+Because sometimes someone eles's code (e.g. a pip module) tries to serialize your object, like
 ```python
 import json
 json.dumps(list_containing_your_object)
 ```
-And it simply throws an error no matter how you customize your object
+And you'd have to fork their code to make it not throw an error.
 
-# How do I use this for my class?
+# How do I use this tool?
 
 `pip install json-fix`
 
 ```python
-import json_fix # import this before the JSON.dumps gets called
+import json_fix # import this any time (any where) before the JSON.dumps gets called
 
 # same file, or different file
 class YOUR_CLASS:
@@ -30,15 +30,20 @@ class YOUR_CLASS:
         return "a built-in object that is natually json-able"
 ```
 
-# How do I change how someone elses class is jsonified?
+# How do I change how imported classes (numpy array, dataframe, etc) are jsonified?
 
-There's 2 ways; the aggressive `override_table` or the more collaboration-friendly `fallback_table`. Some really powerful stuff can be done safely with the fallback table.
+There's 2 ways; the aggressive `override_table` or the more collaboration-friendly `fallback_table`. Note: some really powerful stuff can be done safely with the fallback table!
 
 ## Override Table
 
-If a pip module defines a class, you can control how it is json-dumped, even if they defined a `.__json__()` method, by using `json.override_table`.
-- Note! The "when" (in when-a-rule-is-added) can be very important. Whatever rule was most-recently added will have the highest priority. So, even if a pip module uses the override table, you can override their override by doing `import that_module` and THEN adding your rule to the override table.
-- Note 2! The override table is capable of changing how built-in types are dumped, be careful! 
+**CAUTION!**
+- The override table has such a high priority it will let you change how built in objects are serialized.
+- Even if a class defines a `.__json__()` method, the `json.override_table` will take priority.
+- The order of keys matters a lot. The last entry takes the highest priority (this lets us override pip modules even if they try using the override table).
+
+
+The override table is a dictionary.
+It has "check functions" as keys, and jsonifiers as values. 
 
 ```python
 import json_fix # import this before the JSON.dumps gets called
@@ -48,16 +53,16 @@ import pandas as pd
 SomeClassYouDidntDefine = pd.DataFrame
 
 # create a boolean function for identifying the class
-class_checker = lambda obj: isinstance(obj, SomeClassYouDidntDefine)
+check_func = lambda obj: isinstance(obj, SomeClassYouDidntDefine)
 # then assign it to a function that does the converting
-json.override_table[class_checker] = lambda obj_of_that_class: json.loads(obj_of_that_class.to_json())
+json.override_table[check_func] = lambda obj_of_that_class: json.loads(obj_of_that_class.to_json())
 
 json.dumps([ 1, 2, SomeClassYouDidntDefine() ], indent=2) # dumps as expected
 ```
 
 ## Fallback Table
 
-Let's say we want all python classes to be jsonable by default, well we can easily do that with the fallback table. The logic is `if notthing in override table, and no .__json__ method, then check the fallback table`. 
+If you want **all python classes to be jsonable by default**, we can easily do that with the fallback table. The logic is `if notthing in override table, and no .__json__ method, then check the fallback table`. 
 
 ```python
 import json_fix # import this before the JSON.dumps gets called
