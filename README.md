@@ -62,7 +62,7 @@ json.dumps([ 1, 2, SomeClassYouDidntDefine() ], indent=2) # dumps as expected
 
 ## Fallback Table
 
-If you want **all python classes to be jsonable by default**, we can easily do that with the fallback table. The logic is `if notthing in override table, and no .__json__ method, then check the fallback table`. 
+If you want **all python classes to be jsonable by default**, we can easily do that with the fallback table. The logic is `if nothing in override table, and no .__json__ method, then check the fallback table`. 
 
 ```python
 import json_fix # import this before the JSON.dumps gets called
