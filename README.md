@@ -37,7 +37,7 @@ There's 2 ways; the aggressive `override_table` or the more collaboration-friend
 ## Override Table
 
 **CAUTION!**
-- The override table has such a high priority it will let you change how built in objects are serialized.
+- The override table is so powerful it even lets you change how built in objects are serialized. You can screw yourself (infinite loop) if you're using (abusing) the override table to change giant swaths of objects instead of specific classes.
 - Even if a class defines a `.__json__()` method, the `json.override_table` will take priority.
 - The order of keys matters a lot. The last entry takes the highest priority (this lets us override pip modules even if they try using the override table).
 
