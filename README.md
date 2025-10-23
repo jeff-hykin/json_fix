@@ -7,7 +7,7 @@ From a technical perspective, this module is a safe, backwards-compatible, rever
 
 # Why?
 
-Because sometimes someone eles's code (e.g. a pip module) tries to serialize your object, like
+Because sometimes someone else's code (e.g. a pip module) tries to serialize your object, like
 ```python
 import json
 json.dumps(list_containing_your_object)
