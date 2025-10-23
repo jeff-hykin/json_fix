@@ -9,10 +9,10 @@ author='Jeff Hykin'
 author_email='jeff.hykin@gmail.com'
 url='https://github.com/jeff-hykin/json_fix.git'
 license = "MIT"
-main_module_path = "main/YOUR_PACKAGE_NAME"
+main_module_path = "main/json_fix"
 
 [[tool.extra.pure_python_packages]]
-path = "main/YOUR_PACKAGE_NAME"
+path = "main/json_fix"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.12"
