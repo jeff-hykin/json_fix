@@ -94,7 +94,7 @@
                                 # check for .pypirc for publishing to pypi
                                 if [ -f "$XOME_REAL_HOME/.pypirc" ]
                                 then
-                                    rm "$HOME/.pypirc"
+                                    rm -f "$HOME/.pypirc"
                                     ln -s "$XOME_REAL_HOME/.pypirc" "$HOME/.pypirc"
                                 fi
                                 
